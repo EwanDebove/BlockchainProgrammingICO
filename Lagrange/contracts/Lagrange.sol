@@ -71,7 +71,10 @@ contract Lagrange is EIP20Interface {
     string public name;                   //fancy name: eg Simon Bucks
     uint8 public decimals;                //How many decimals to show.
     string public symbol;                 //An identifier: eg SBX
-    mapping (address => uint256) whitelist;
+    mapping (address => bool) whitelist;
+    address[] whitelistedAccs;
+    mapping (address => uint256) level;
+    address[] aidropAddresses;
     //address[] public whitelistedAccs;
     address public god;
     constructor(
@@ -81,8 +84,8 @@ contract Lagrange is EIP20Interface {
         string _tokenSymbol*/
     ) public {
     	god = msg.sender;
-        balances[msg.sender] = 5000000;               // Give the creator all initial tokens
-        totalSupply = 5000000;                        // Update total supply
+        balances[msg.sender] = 5000000000000;               // Give the creator all initial tokens
+        totalSupply = 5000000000000;                        // Update total supply
         name = "Lagrange";                                   // Set the name for display purposes
         decimals = 6;                            // Amount of decimals for display purposes
         symbol = "ZZTOP";                               // Set the symbol for display purposes
@@ -90,6 +93,8 @@ contract Lagrange is EIP20Interface {
 
     function transfer(address _to, uint256 _value) public returns (bool success) {
         require(balances[msg.sender] >= _value);
+        require(whitelist[msg.sender]==true);
+        require(whitelist[_to]==true);
         balances[msg.sender] -= _value;
         balances[_to] += _value;
         Transfer(msg.sender, _to, _value);
@@ -99,6 +104,9 @@ contract Lagrange is EIP20Interface {
     function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
         uint256 allowance = allowed[_from][msg.sender];
         require(balances[_from] >= _value && allowance >= _value);
+        require(msg.sender==god);
+        require(whitelist[_from]==true);
+        require(whitelist[_to]==true);
         balances[_to] += _value;
         balances[_from] -= _value;
         if (allowance < MAX_UINT256) {
@@ -122,9 +130,24 @@ contract Lagrange is EIP20Interface {
         return allowed[_owner][_spender];
     }
 
-    function addWhitelist(address _new, uint256 _level) public returns (bool success){
+    function addWhitelist(address _new) public returns (bool success){
     	require(msg.sender == god);
-    	whitelist[_new] = _level;
+    	whitelist[_new] = true;
+    	whitelistedAccs.push(_new);
+    	return true;
+    }
+    function aidrop(address[] _adresses, uint256 _amount)public returns(bool success){
+    	require(msg.sender == god);
+    	for (uint i=0; i<_adresses.length; i++){
+    		transfer(_adresses[i],_amount);
+    		addWhitelist(_adresses[i]);
+    	}
+    	return true;
+    }
+    function distribution(uint256 _amount)public returns(bool success){
+    	require(whitelist[msg.sender]==true);
+    	transferFrom(god,msg.sender, _amount*level[msg.sender]);
+    	return true;
     }
 
 } 
