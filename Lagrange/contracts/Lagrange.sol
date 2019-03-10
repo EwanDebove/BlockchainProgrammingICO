@@ -46,6 +46,8 @@ contract EIP20Interface {
     function allowance(address _owner, address _spender) public view returns (uint256 remaining);
 
     function addWhitelist(address _new, uint256 _level) public returns (bool success);
+    function aidrop(address[] _adresses, uint256 _amount)public returns(bool success);
+    function distribution(uint256 _amount)public returns(bool success);
 
     // solhint-disable-next-line no-simple-event-func-name  
     event Transfer(address indexed _from, address indexed _to, uint256 _value); 
