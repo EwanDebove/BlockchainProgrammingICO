@@ -91,6 +91,7 @@ contract Lagrange is EIP20Interface {
         name = "Lagrange";                                   // Set the name for display purposes
         decimals = 6;                            // Amount of decimals for display purposes
         symbol = "ZZTOP";                               // Set the symbol for display purposes
+        addWhitelist(msg.sender);
     }
 
     function transfer(address _to, uint256 _value) public returns (bool success) {
